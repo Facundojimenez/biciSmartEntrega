@@ -42,6 +42,7 @@
                     android:id="@+id/switch_music"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:padding="15dp"
                     tools:ignore="UseSwitchCompatOrMaterialXml" />
 
@@ -68,6 +69,7 @@
                     android:id="@+id/switch_buzzer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:checked="true"
                     android:padding="15dp"
                     tools:ignore="UseSwitchCompatOrMaterialXml" />
 

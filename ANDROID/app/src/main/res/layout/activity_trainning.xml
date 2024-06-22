@@ -9,47 +9,41 @@
     android:padding="14dp"
     tools:context=".TrainningActivity">
 
-    <LinearLayout
+    <TextView
+        android:id="@+id/tv_tipoEntrenamiento"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:text="Por tiempo" />
 
-        <TextView
-            android:id="@+id/tv_tipoEntrenamiento"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Por tiempo" />
+    <TextView
+        android:id="@+id/tvAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Address" />
 
-        <TextView
-            android:id="@+id/tvAddress"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Address" />
+    <TextView
+        android:id="@+id/tv_duracion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Duracion" />
 
-        <TextView
-            android:id="@+id/tv_duracion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Duracion" />
+    <TextView
+        android:id="@+id/tv_intensidad"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Intensidad" />
 
-        <TextView
-            android:id="@+id/tv_intensidad"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Intensidad" />
+    <TextView
+        android:id="@+id/tv_buzzer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Buzzer" />
 
-        <TextView
-            android:id="@+id/tv_buzzer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Buzzer" />
-
-        <TextView
-            android:id="@+id/tv_MusicaDin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Musica Dinamica" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/tv_MusicaDin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Musica Dinamica" />
 
     <TextView
         android:id="@+id/tv_estado"

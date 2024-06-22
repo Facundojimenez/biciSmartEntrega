@@ -7,9 +7,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
 import android.os.Handler;
-import android.widget.TextView;
 
-import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.UUID;

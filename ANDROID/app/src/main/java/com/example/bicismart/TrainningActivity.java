@@ -95,13 +95,10 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
         tvEstado = findViewById(R.id.tv_estado);
 
-        tvSummaryTiempo = findViewById(R.id.tvSummaryTiempo);
-        tvSummaryMetrosRecorridos = findViewById(R.id.tvSummaryMetrosRecorridos);
-        tvSummaryVelocidadMedia = findViewById(R.id.tvSummaryVelocidadMedia);
-        tvSummaryTitulo = findViewById(R.id.tvSummaryTitulo);
 
         btnRestart = findViewById(R.id.btn_restart);
         btnRestart.setText("Cancelar Entrenamiento");
+        btnRestart.setEnabled(false);
 
         Bundle bundle =getIntent().getExtras();
         address = bundle.getString("Direccion_Bluethoot");
@@ -120,20 +117,15 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         tvMusDin.setText("Musica Dinamica: " + enableMusDin);
         tvAddress.setText("Address: " + address);
 
-        btnRestart.setOnClickListener(new View.OnClickListener()
-        {
-          @Override
-          public void onClick(View v)
-          {
-              Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
-              intent.putExtra("Direccion_Bluethoot", address);
-              if (!TRAINING_FINISHED){
-                  mConnectedThread.write("CANCEL");
-                  return;
-              }
-              startActivity(intent);
-              finish();
-          }
+        btnRestart.setOnClickListener(v -> {
+            Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
+            intent.putExtra("Direccion_Bluethoot", address);
+            if (!TRAINING_FINISHED){
+                mConnectedThread.write("CANCEL");
+                return;
+            }
+            startActivity(intent);
+            finish();
         });
 
         mSocket = SingletonSocket.getInstance("", null);
@@ -331,8 +323,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                         if(commandName.startsWith("ENDED"))
                         {
                             int commandNameIndex = commandName.indexOf("|");
-//                            commandArguments = commandName.substring(commandNameIndex + 1, commandName.length()).split("\\|");
-//                            commandName = commandName.substring(0, commandNameIndex);
                             resumen = commandName.substring(commandNameIndex+1);
                             commandName = commandName.substring(0,commandNameIndex);
                         }
@@ -352,7 +342,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 trainingPaused = true;
                                 break;
                             case "ENDED":
-                                //tvEstado.setText("Entrenamiento Finalizado\n" + resumen);
+
                                 tvEstado.setText(resumen);
                                 btnRestart.setText("Reiniciar");
                                 mService.stopMusic();
@@ -360,6 +350,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 TRAINING_FINISHED = true;
                                 break;
                             case "STARTED":
+                                btnRestart.setEnabled(true);
                             case "RESUMED":
                                 tvEstado.setText("Entrenamiento en Curso");
                                 break;
@@ -390,7 +381,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0 );
                                 showToast("Volumen: " + volume);
                             default:
-                                showToast("Comando Erroneo");
+//                                showToast("Comando Erroneo");
                                 break;
                         }
                         recDataString.delete(0, recDataString.length());
