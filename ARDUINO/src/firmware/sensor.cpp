@@ -1,21 +1,21 @@
 #include <Arduino.h>
 #include "definitions.h"
 
-// External Variables/ Calculo de velocidad
-volatile unsigned long lastActivationTime = 0;
-volatile unsigned long currentActivationTime = 0;
-volatile unsigned long newacttime  = 0;
-volatile unsigned long timediff = 0;
-bool acabaDePedalear = false;
+// External Variables / Calculo de velocidad
+unsigned long lastPedalActivationTime = 0;
+unsigned long currentPedalActivationTime = 0;
+unsigned long currentTime = 0;
+unsigned long timeDiff = 0;
+bool pedalWasPressed = false;
 float lowSpeed;
 float highSpeed;
-//Serial serial;
 
-void checkSpeedSensor() 
+void checkSpeedSensor()
 {
 
-  newacttime = millis();
-  if (newacttime - lastActivationTime > BIKE_IS_STOPPED_TIME) 
+  currentTime = millis();
+  // check if bike is stopped
+  if (currentTime - lastPedalActivationTime > BIKE_IS_STOPPED_TIMEOUT)
   {
     speed_MS = 0;
   }
@@ -23,174 +23,170 @@ void checkSpeedSensor()
   int sensorValue = analogRead(HALL_SENSOR_PIN);
   Serial.println(sensorValue);
 
-  if (!acabaDePedalear && sensorValue < LOWER_SENSOR_HALL_THRESHOLD) 
+  if (!pedalWasPressed && sensorValue < LOWER_HALL_SENSOR_THRESHOLD)
   {
-    currentActivationTime = millis();
-    if (lastActivationTime > 0) 
+    currentPedalActivationTime = millis();
+
+    if (lastPedalActivationTime > 0)
     {
-      timediff = currentActivationTime - lastActivationTime;
-      speed_MS = BIKE_WHEEL_CIRCUNFERENCE_PERIMETER_MM / (float)timediff;
+      timeDiff = currentPedalActivationTime - lastPedalActivationTime;
+      speed_MS = BIKE_WHEEL_CIRCUNFERENCE_PERIMETER_MM / (float)timeDiff;
     }
-    acabaDePedalear = true;
+    pedalWasPressed = true;
+    lastPedalActivationTime = currentPedalActivationTime;
   }
-  else 
+  else if (sensorValue > LOWER_HALL_SENSOR_THRESHOLD)
   {
-    acabaDePedalear = false;
+    pedalWasPressed = false;
   }
 
-  lastActivationTime = currentActivationTime;
   Serial.println(speed_MS);
 }
 
-void checkMediaButtonSensor() 
+void checkMediaButtonSensor()
 {
   int buttonState = digitalRead(MEDIA_MOVEMENT_SENSOR_PIN);
-  if (buttonState == HIGH) 
+  if (buttonState == HIGH)
   {
     currentEvent = EVENT_NEXT_MEDIA_BUTTON;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void checkPlayStopButtonSensor() 
+void checkPlayStopButtonSensor()
 {
   int buttonState = digitalRead(PLAY_STOP_MEDIA_SENSOR_PIN);
-  if (buttonState == HIGH) 
+  if (buttonState == HIGH)
   {
     currentEvent = EVENT_PLAY_STOP_MEDIA_BUTTON;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void checkCancelButtonSensor() 
+void checkCancelButtonSensor()
 {
   int buttonState = digitalRead(TRAINING_CANCEL_PIN);
-  if (buttonState == HIGH) 
+  if (buttonState == HIGH)
   {
     currentEvent = EVENT_TRAINING_CANCELLED;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void checkTrainingButtonSensor() 
+void checkTrainingButtonSensor()
 {
   int buttonState = digitalRead(TRAINING_CONTROL_PIN);
 
-  if (buttonState == HIGH) 
+  if (buttonState == HIGH)
   {
     currentEvent = EVENT_TRAINING_BUTTON;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void checkTrainingBluetoothInterface() 
+void checkTrainingBluetoothInterface()
 {
-  if (!trainingReceived) 
+  if (!trainingReceived)
   {
-    if (BT.available() > 0) 
+    if (BT.available() > 0)
     {
       String consoleCommand = BT.readString();
-      //int dynamicMusic;
-      //sscanf(consoleCommand.c_str(), "%d %d %d", &(setTraining.setTime), &(setTraining.setMeters), &(setTraining.dynamicMusic));
-      sscanf(consoleCommand.c_str(), "%d %d %d %d %d", &(setTraining.setTime), &(setTraining.setMeters), 
-                                                      &(setTraining.dynamicMusic), &(setTraining.enableBuzzer),
-                                                     &(setTraining.intensity));
+      sscanf(consoleCommand.c_str(), "%d %d %d %d %d", &(setTraining.setTime), &(setTraining.setMeters),
+             &(setTraining.dynamicMusic), &(setTraining.enableBuzzer),
+             &(setTraining.intensity));
       setTraining.personalizedTraining = true;
 
       switch (setTraining.intensity)
       {
-        case 1:
-        lowSpeed = LOW_SPEED_LOW;
-        highSpeed = HIGH_SPEED_LOW;
+      case LOW_INTENSITY:
+        lowSpeed = LOW_LEVEL_LOW_SPEED;
+        highSpeed = LOW_LEVEL_HIGH_SPEED;
         break;
-        case 2:
-        lowSpeed = LOW_SPEED_MEDIA;
-        highSpeed = HIGH_SPEED_MEDIA;
+      case MID_INTENSITY:
+        lowSpeed = MID_INTENSITY_LOW_SPEED;
+        highSpeed = MID_INTENSITY_HIGH_SPEED;
         break;
-        case 3:
-        lowSpeed = LOW_SPEED_HIGH;
-        highSpeed = HIGH_SPEED_HIGH;
+      case HIGH_INTENSITY:
+        lowSpeed = HIGH_INTENSITY_LOW_SPEED;
+        highSpeed = HIGH_INTENSITY_HIGH_SPEED;
         break;
-        default:
+      default:
         break;
       }
-      // if ((setTraining.setMeters != 0 && setTraining.setTime != 0) || (setTraining.setMeters == 0 && setTraining.setTime == 0)) 
-      // {
-      //   Serial.println("Entrenamiento Invalido");
-      //   setTraining.setMeters = 0;
-      //   setTraining.setTime = 0;
-      //   return;
-      // }
-      // if (dynamicMusic)
-      //   setTraining.dynamicMusic = true;
-      // else
-      //   setTraining.dynamicMusic = false;
 
       currentEvent = EVENT_TRAINING_RECEIVED;
       trainingReceived = true;
     }
-  } else 
+  }
+  else
   {
-    if (BT.available() > 0) 
+    if (BT.available() > 0)
     {
       String consoleCommand = BT.readString();
-      if(consoleCommand == "RESUME" || consoleCommand == "PAUSE")
+      if (consoleCommand == "RESUME" || consoleCommand == "PAUSE")
         currentEvent = EVENT_TRAINING_BUTTON;
-      if(consoleCommand == "CANCEL")
+      if (consoleCommand == "CANCEL")
         currentEvent = EVENT_TRAINING_CANCELLED;
-    }else
+    }
+    else
     {
       currentEvent = EVENT_CONTINUE;
-    } 
+    }
   }
 }
 
-void checkSummaryBluetooth() 
+void checkSummaryBluetooth()
 {
-  if (summarySent) 
+  if (summarySent)
   {
 
     currentEvent = EVENT_TRAINING_RESTARTED;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void checkProgress() 
+void checkProgress()
 {
-  if (summary.timeDone == 0) 
+  if (summary.timeDone == 0)
   {
     currentEvent = EVENT_CONTINUE;
     return;
   }
 
-  if (setTraining.setTime != 0) 
+  if (setTraining.setTime != 0)
   {
-    if (summary.timeDone >= (setTraining.setTime)) 
+    if (summary.timeDone >= (setTraining.setTime))
     {
       currentEvent = EVENT_TRAINING_CONCLUDED;
     }
-  } else 
+  }
+  else
   {
-    if (summary.metersDone >= setTraining.setMeters) 
+    if (summary.metersDone >= setTraining.setMeters)
     {
       currentEvent = EVENT_TRAINING_CONCLUDED;
     }
   }
 }
 
-void checkVolumeSensor() 
+void checkVolumeSensor()
 {
-  if (summary.timeDone == 0) 
+  if (summary.timeDone == 0)
   {
     currentEvent = EVENT_CONTINUE;
     return;
@@ -198,41 +194,40 @@ void checkVolumeSensor()
 
   int value = analogRead(VOLUME_SENSOR_PIN);
   int currentVolumeValue = map(value, MIN_POT_VALUE, MAX_POT_VALUE, MIN_VOLUME, MAX_VOLUME);
-  //Serial.print("vol read:" );
- // Serial.println(currentVolumeValue);
 
-  if (currentVolumeValue != lastVolumeValue) 
+  if (currentVolumeValue != lastVolumeValue)
   {
     currentEvent = EVENT_VOLUME_CHANGE;
     lastVolumeValue = currentVolumeValue;
-    
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }
 }
 
-void (*check_sensor[NUMBER_OF_SENSORS])() = 
-{
-  checkSpeedSensor,
-  checkCancelButtonSensor,
-  checkTrainingButtonSensor,
-  checkPlayStopButtonSensor,
-  checkMediaButtonSensor,
-  checkTrainingBluetoothInterface,
-  checkSummaryBluetooth,
-  checkProgress,
-  checkVolumeSensor
-};
+void (*check_sensor[NUMBER_OF_SENSORS])() =
+    {
+        checkSpeedSensor,
+        checkCancelButtonSensor,
+        checkTrainingButtonSensor,
+        checkPlayStopButtonSensor,
+        checkMediaButtonSensor,
+        checkTrainingBluetoothInterface,
+        checkSummaryBluetooth,
+        checkProgress,
+        checkVolumeSensor};
 
-void get_event() {
+void get_event()
+{
   unsigned long currentTime = millis();
-  if ((currentTime - previousTime) > MAX_SENSOR_LOOP_TIME) 
+  if ((currentTime - previousTime) > MAX_SENSOR_LOOP_TIME)
   {
     check_sensor[index]();
     index = ++index % NUMBER_OF_SENSORS;
     previousTime = currentTime;
-  } else 
+  }
+  else
   {
     currentEvent = EVENT_CONTINUE;
   }

@@ -4,6 +4,9 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -61,10 +64,8 @@ public class PreTrainingActivity extends AppCompatActivity
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
         {
             @Override
-            public void onPageSelected(int position)
-            {
-                System.out.println("me llamaron");
-                System.out.println(position);
+            public void onPageSelected(int position) {
+                Log.d("ViewPager", "Page selected: " + position);
                 tabLayout.selectTab(tabLayout.getTabAt(position));
             }
         });
@@ -75,13 +76,13 @@ public class PreTrainingActivity extends AppCompatActivity
                 AlertDialog.Builder builder = new AlertDialog.Builder(PreTrainingActivity.this);
                 builder.setMessage("¿Desea salir de la aplicación?");
 
-                builder.setPositiveButton("Si", (DialogInterface.OnClickListener) (dialog, which) -> {
+                builder.setPositiveButton("Si", (dialog, which) -> {
                     // cerrar app
                     finishAffinity();
 
                 });
 
-                builder.setNegativeButton("No", (DialogInterface.OnClickListener) (dialog, which) -> {
+                builder.setNegativeButton("No", (dialog, which) -> {
                     dialog.cancel();
                 });
 

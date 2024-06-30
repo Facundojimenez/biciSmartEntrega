@@ -2,6 +2,7 @@ package com.example.bicismart;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import android.Manifest;
@@ -70,14 +71,14 @@ public class BluetoothActivity extends Activity
         if (Build.VERSION.SDK_INT >= 31)
         {
             mBluetoothAdapter = bluetoothManager.getAdapter();
-            checkPermissions();
+            checkPermissions_PAST_SDK_31();
         } else
         {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            checkBTPermissions();
+            checkBTPermissions_PRE_SDK_31();
         }
 
-        enableComponent();
+        enableBluetoothComponent();
     }
 
     @SuppressLint("MissingPermission")
@@ -98,20 +99,20 @@ public class BluetoothActivity extends Activity
     public void onDestroy()
     {
         super.onDestroy();
-        unregisterReceiver(mReceiver);
+        unregisterReceiver(bluetoothBroadcastReceiver);
     }
 
-    private void checkPermissions()
+    private void checkPermissions_PAST_SDK_31()
     {
         int result;
         List<String> listPermissionsNeeded = new ArrayList<>();
 
-        for (String p:permissions)
+        for (String permission:permissions)
         {
-            result = ContextCompat.checkSelfPermission(this,p);
+            result = ContextCompat.checkSelfPermission(this,permission);
             if (result != PackageManager.PERMISSION_GRANTED)
             {
-                listPermissionsNeeded.add(p);
+                listPermissionsNeeded.add(permission);
             }
         }
         if (!listPermissionsNeeded.isEmpty())
@@ -120,7 +121,7 @@ public class BluetoothActivity extends Activity
         }
     }
 
-    private void checkBTPermissions()
+    private void checkBTPermissions_PRE_SDK_31()
     {
         int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
         permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
@@ -130,7 +131,7 @@ public class BluetoothActivity extends Activity
         }
     }
 
-    protected  void enableComponent()
+    protected  void enableBluetoothComponent()
     {
         if (mBluetoothAdapter == null)
         {
@@ -153,47 +154,95 @@ public class BluetoothActivity extends Activity
         filter.addAction(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-        registerReceiver(mReceiver, filter);
+        registerReceiver(bluetoothBroadcastReceiver, filter);
     }
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver()
-    {
+    private final BroadcastReceiver bluetoothBroadcastReceiver = new BroadcastReceiver() {
         @SuppressLint("MissingPermission")
-        public void onReceive(Context context, Intent intent)
-        {
-            String action = intent.getAction();
-            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action))
-            {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-                if (state == BluetoothAdapter.STATE_ON)
-                {
-                    showToast("Activar");
-                    showEnabled();
-                }
-            }
-            else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
-            {
-                mDeviceList = new ArrayList<>();
-            }
-            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
-            {
-                Intent newIntent = new Intent(BluetoothActivity.this, DeviceListActivity.class);
-                newIntent.putParcelableArrayListExtra("device.list", mDeviceList);
-                startActivity(newIntent);
-            }
-            else if (BluetoothDevice.ACTION_FOUND.equals(action))
-            {
-                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                if(!(mDeviceList.contains(device)))
-                    mDeviceList.add(device);
+        public void onReceive(Context context, Intent intent) {
+            try {
+                String action = intent.getAction();
 
-                if (device != null)
-                {
-                    showToast("Dispositivo Encontrado:" + device.getName());
+                switch (Objects.requireNonNull(action)) {
+                    case BluetoothAdapter.ACTION_STATE_CHANGED:
+                        handleBluetoothStateChanged(intent);
+                        break;
+                    case BluetoothAdapter.ACTION_DISCOVERY_STARTED:
+                        mDeviceList = new ArrayList<>();
+                        break;
+                    case BluetoothAdapter.ACTION_DISCOVERY_FINISHED:
+                        launchDeviceListActivity();
+                        break;
+                    case BluetoothDevice.ACTION_FOUND:
+                        handleDeviceFound(intent);
+                        break;
                 }
+            } catch (NullPointerException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        private void handleBluetoothStateChanged(Intent intent) {
+            final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+            if (state == BluetoothAdapter.STATE_ON) {
+                showToast("Bluetooth Enabled");
+                showEnabled();
+            }
+        }
+
+        private void launchDeviceListActivity() {
+            Intent newIntent = new Intent(BluetoothActivity.this, DeviceListActivity.class);
+            newIntent.putParcelableArrayListExtra("device.list", mDeviceList);
+            startActivity(newIntent);
+        }
+
+        @SuppressLint("MissingPermission")
+        private void handleDeviceFound(Intent intent) {
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (device != null && !mDeviceList.contains(device)) {
+                mDeviceList.add(device);
+                showToast("Device Found: " + device.getName());
             }
         }
     };
+//    private final BroadcastReceiver bluetoothBroadcastReceiver = new BroadcastReceiver()
+//    {
+//        @SuppressLint("MissingPermission")
+//        public void onReceive(Context context, Intent intent)
+//        {
+//            String action = intent.getAction();
+//            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action))
+//            {
+//                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
+//                if (state == BluetoothAdapter.STATE_ON)
+//                {
+//                    showToast("Activar");
+//                    showEnabled();
+//                }
+//            }
+//            else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
+//            {
+//                mDeviceList = new ArrayList<>();
+//            }
+//            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
+//            {
+//                Intent newIntent = new Intent(BluetoothActivity.this, DeviceListActivity.class);
+//                newIntent.putParcelableArrayListExtra("device.list", mDeviceList);
+//                startActivity(newIntent);
+//            }
+//            else if (BluetoothDevice.ACTION_FOUND.equals(action))
+//            {
+//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+//                if(!(mDeviceList.contains(device)))
+//                    mDeviceList.add(device);
+//
+//                if (device != null)
+//                {
+//                    showToast("Dispositivo Encontrado:" + device.getName());
+//                }
+//            }
+//        }
+//    };
 
 
     public void btnEmparejarListener (View v)
@@ -207,11 +256,10 @@ public class BluetoothActivity extends Activity
         }
         else
         {
-            ArrayList<BluetoothDevice> list = new ArrayList<>();
-            list.addAll(pairedDevices);
+            ArrayList<BluetoothDevice> pairedBluetoothDeviceList = new ArrayList<>(pairedDevices);
 
             Intent intent = new Intent(BluetoothActivity.this,DeviceListActivity.class);
-            intent.putParcelableArrayListExtra("device.list", list);
+            intent.putParcelableArrayListExtra("device.list", pairedBluetoothDeviceList);
             startActivity(intent);
         }
     }

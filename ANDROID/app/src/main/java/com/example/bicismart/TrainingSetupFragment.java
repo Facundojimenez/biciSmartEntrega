@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 public class TrainingSetupFragment extends Fragment {
 
+    public static final int MAXIMUM_TIME_METERS_VALUE = 100000;
     RadioButton btnTime, btnMeters;
     private TextView tvTrainningParameter;
     private EditText etTrainningParameter;
@@ -62,13 +63,9 @@ public class TrainingSetupFragment extends Fragment {
             address = getArguments().getString("Direccion_Bluetooth");
         }
 
-        getParentFragmentManager().setFragmentResultListener("datos", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                enableBuzzer = result.getBoolean("Buzzer");
-
-                enableDinMusic = result.getBoolean("Musica_Dinamica");
-            }
+        getParentFragmentManager().setFragmentResultListener("datos", this, (requestKey, result) -> {
+            enableBuzzer = result.getBoolean("Buzzer");
+            enableDinMusic = result.getBoolean("Musica_Dinamica");
         });
     }
 
@@ -129,7 +126,7 @@ public class TrainingSetupFragment extends Fragment {
                 showToast("Ingresar Parametros");
             else {
                 int valor = Integer.parseInt(str);
-                if (valor >= 1 && valor < 100000) {
+                if (valor >= 1 && valor < MAXIMUM_TIME_METERS_VALUE) {
                     Intent i = new Intent(getActivity(), TrainningActivity.class);
                     i.putExtra("Direccion_Bluethoot", address);
                     i.putExtra("Duracion", valor);
@@ -138,7 +135,7 @@ public class TrainingSetupFragment extends Fragment {
                     i.putExtra("Buzzer", enableBuzzer);
                     i.putExtra("Musica Dinamica", enableDinMusic);
                     startActivity(i);
-                } else if (valor > 100000) {
+                } else if (valor > MAXIMUM_TIME_METERS_VALUE) {
                     String youtubeVideoLink = "https://www.youtube.com/watch?v=BGljR9vf3Os";
 
                     Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(youtubeVideoLink));

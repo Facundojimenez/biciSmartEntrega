@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothSocket;
 import android.os.Build;
 import android.os.Handler;
+import android.util.Log;
 
 
 import java.io.IOException;
@@ -36,27 +37,24 @@ public class SingletonSocket
 
         BluetoothDevice device = btAdapter.getRemoteDevice(address);
 
-        try
-        {
-            btSocket = createBluetoothSocket(device);
-        }
-        catch (IOException e)
-        {
 
-        }
         // Establish the Bluetooth socket connection.
         try
         {
+            btSocket = createBluetoothSocket(device);
             btSocket.connect();
         }
         catch (IOException e)
         {
+            // Handle connection failure
+            Log.e("SingletonSocket", "Error connecting to Bluetooth device", e); // Log the error for debugging
             try
             {
                 btSocket.close();
             }
             catch (IOException e2)
             {
+                Log.e("SingletonSocket", "Error closing Bluetooth socket", e2); // Log the error for debugging
                 //insert code to deal with this
             }
         }
@@ -83,15 +81,29 @@ public class SingletonSocket
         return this.btSocket;
     }
 
-    public void close()
-    {
-        try
-        {
-            this.btSocket.close();
-            this.instance = null;
-        } catch (IOException e)
-        {
+//    public void close()
+//    {
+//        try
+//        {
+//            this.btSocket.close();
+//            this.instance = null;
+//        } catch (IOException e)
+//        {
+//
+//        }
+//    }
 
+    public void close() {
+        try {
+            if (btSocket != null) {  // Check if btSocket is initialized
+                btSocket.close();
+                btSocket = null;  // Set to null after closing
+            }
+        } catch (IOException e) {
+            // Handle the exception, e.g., log it
+            Log.e("BluetoothManager", "Error closing Bluetooth socket", e);
+        } finally {
+            instance = null;  // Ensure instance is nullified regardless of exceptions
         }
     }
 
