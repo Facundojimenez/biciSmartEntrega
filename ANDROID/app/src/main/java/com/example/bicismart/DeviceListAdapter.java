@@ -11,12 +11,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-/**
- * Device list adapter.
- *
- * @author Lorensius W. L. T <lorenz@londatiga.net>
- *
- */
 public class DeviceListAdapter extends BaseAdapter
 {
     private final LayoutInflater mInflater;

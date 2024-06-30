@@ -41,7 +41,6 @@ public class TrainingSetupFragment extends Fragment {
     private static String address = null;
 
     private boolean enableBuzzer = true;
-    //private boolean enableSensor = true;
     private boolean enableDinMusic = true;
 
     public TrainingSetupFragment() {

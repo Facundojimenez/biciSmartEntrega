@@ -89,7 +89,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         tvDuracion = findViewById(R.id.tv_duracion);
         tvIntensidad = findViewById(R.id.tv_intensidad);
         tvBuzzer = findViewById(R.id.tv_buzzer);
-        //tvSensores = findViewById(R.id.tv_Sensores);
         tvMusDin = findViewById(R.id.tv_MusicaDin);
         tvAddress = findViewById(R.id.tvAddress);
         tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
@@ -370,7 +369,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                             case "PLAY/STOP":
                                 if (firstSong && !enableMusDin)
                                 {
-                                    //mService.listRaw();
                                     mService.startMusic();
                                     firstSong = false;
                                 }

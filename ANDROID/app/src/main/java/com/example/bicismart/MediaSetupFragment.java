@@ -37,7 +37,6 @@ public class MediaSetupFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
         swMusic = view.findViewById(R.id.switch_music);
-        //swSensor = view.findViewById(R.id.switch_sensor);
         swBuzzer = view.findViewById(R.id.switch_buzzer);
         btnSave = view.findViewById(R.id.btn_save);
 
