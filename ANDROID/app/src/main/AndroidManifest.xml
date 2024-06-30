@@ -29,7 +29,7 @@
             android:enabled="true"
             android:exported="true"></service>
         <activity
-            android:name=".TrainningActivity"
+            android:name=".TrainingActivity"
             android:exported="false" />
         <activity
             android:name=".DeviceListActivity"

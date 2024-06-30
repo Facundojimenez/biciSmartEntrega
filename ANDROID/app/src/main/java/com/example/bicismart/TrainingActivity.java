@@ -35,15 +35,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 
-public class TrainningActivity extends AppCompatActivity implements SensorEventListener
+public class TrainingActivity extends AppCompatActivity implements SensorEventListener
 {
-    TextView tvDuracion, tvIntensidad, tvBuzzer,  tvMusDin, tvAddress, tvTipoEntrenamiento, tvSummaryTiempo, tvSummaryMetrosRecorridos, tvSummaryVelocidadMedia, tvSummaryTitulo;
-    static TextView tvEstado;
+    TextView tvDuration, tvIntensity, tvBuzzer, tvDynamicMusic, tvAddress, tvTrainingType;
+    static TextView tvStatus;
     //Parametros
-    int duracion;
-    String intensidad;
-    boolean enableBuzzer, forTime;
-    static boolean enableMusDin;
+    int duration;
+    String intensity;
+    boolean enableBuzzer, trainingByTime;
+    static boolean enableDynamicMusic;
     //Musica
     static MusicService mService;
     static boolean mMediaPlayerServiceIsBound = false;
@@ -87,13 +87,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
 
         TRAINING_FINISHED = false;
-        tvDuracion = findViewById(R.id.tv_duracion);
-        tvIntensidad = findViewById(R.id.tv_intensidad);
+        tvDuration = findViewById(R.id.tv_duracion);
+        tvIntensity = findViewById(R.id.tv_intensidad);
         tvBuzzer = findViewById(R.id.tv_buzzer);
-        tvMusDin = findViewById(R.id.tv_MusicaDin);
+        tvDynamicMusic = findViewById(R.id.tv_MusicaDin);
         tvAddress = findViewById(R.id.tvAddress);
-        tvTipoEntrenamiento = findViewById(R.id.tv_tipoEntrenamiento);
-        tvEstado = findViewById(R.id.tv_estado);
+        tvTrainingType = findViewById(R.id.tv_tipoEntrenamiento);
+        tvStatus = findViewById(R.id.tv_estado);
 
 
         btnRestart = findViewById(R.id.btn_restart);
@@ -101,25 +101,25 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         btnRestart.setEnabled(false);
 
         Bundle bundle =getIntent().getExtras();
-        address = bundle.getString("Direccion_Bluethoot");
-        duracion = bundle.getInt("Duracion");
-        intensidad = bundle.getString("Intensidad");
+        address = bundle.getString("Direccion_Bluetooth");
+        duration = bundle.getInt("Duracion");
+        intensity = bundle.getString("Intensidad");
         enableBuzzer = bundle.getBoolean("Buzzer");
 
-        enableMusDin = bundle.getBoolean("Musica Dinamica");
-        forTime = bundle.getBoolean("Por Tiempo");
+        enableDynamicMusic = bundle.getBoolean("Musica Dinamica");
+        trainingByTime = bundle.getBoolean("Por Tiempo");
 
-        tvTipoEntrenamiento.setText("Por Tiempo: " + forTime);
-        tvDuracion.setText("Duracion: " + duracion);
-        tvIntensidad.setText("Intensidad: " + intensidad);
+        tvTrainingType.setText("Por Tiempo: " + trainingByTime);
+        tvDuration.setText("Duracion: " + duration);
+        tvIntensity.setText("Intensidad: " + intensity);
         tvBuzzer.setText("Buzzer: " + enableBuzzer);
 
-        tvMusDin.setText("Musica Dinamica: " + enableMusDin);
+        tvDynamicMusic.setText("Musica Dinamica: " + enableDynamicMusic);
         tvAddress.setText("Address: " + address);
 
         btnRestart.setOnClickListener(v -> {
-            Intent intent = new Intent(TrainningActivity.this, PreTrainingActivity.class);
-            intent.putExtra("Direccion_Bluethoot", address);
+            Intent intent = new Intent(TrainingActivity.this, PreTrainingActivity.class);
+            intent.putExtra("Direccion_Bluetooth", address);
             if (!TRAINING_FINISHED){
                 mConnectedThread.write("CANCEL");
                 return;
@@ -144,15 +144,15 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         mConnectedThread = new ConnectedThread(mSocket.getBtSocket());
         mConnectedThread.start();
 
-        if(forTime)
+        if(trainingByTime)
         {
-            int timeInSeconds = duracion * 60;
-            mConnectedThread.write(timeInSeconds + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            int timeInSeconds = duration * 60;
+            mConnectedThread.write(timeInSeconds + " 0 " + (enableDynamicMusic ? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensity.equals("Baja")?1:(intensity.equals("Media")?2:3)));
         }
         else
         {
-            int durationInMeters = duracion;
-            mConnectedThread.write("0 " + durationInMeters + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            int durationInMeters = duration;
+            mConnectedThread.write("0 " + durationInMeters + " " + (enableDynamicMusic ? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensity.equals("Baja")?1:(intensity.equals("Media")?2:3)));
         }
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
@@ -245,12 +245,12 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     if (event.values[0] <= 0) {
                         if (trainingPaused) {
                             mConnectedThread.write("RESUME");
-                            tvEstado.setText("Entrenamiento en Curso");
+                            tvStatus.setText("Entrenamiento en Curso");
                             trainingPaused = false;
                             playPauseMusic();
                         } else {
                             mConnectedThread.write("PAUSE");
-                            tvEstado.setText("Entrenamiento Pausado");
+                            tvStatus.setText("Entrenamiento Pausado");
                             trainingPaused = true;
                             playPauseMusic();
                         }
@@ -287,13 +287,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     public void playMusic(String music)
     {
         if(mMediaPlayerServiceIsBound)
-            mService.setMusic(music);
+            mService.setDynamicMusic(music);
     }
 
     public void playPauseMusic()
     {
         if(mMediaPlayerServiceIsBound)
-            mService.playPauseMusic();
+            mService.toggleMusic();
     }
 
     private Handler Handler_Msg_Hilo_Principal ()
@@ -311,12 +311,12 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     if (endOfLineIndex > 0)
                     {
                         String commandName = recDataString.substring(0, endOfLineIndex).replaceAll("(\\r)", "");
-                        String resumen = "";
+                        String summary = "";
                         int volume = 0;
                         if(commandName.startsWith("ENDED"))
                         {
                             int commandNameIndex = commandName.indexOf("|");
-                            resumen = commandName.substring(commandNameIndex+1);
+                            summary = commandName.substring(commandNameIndex+1);
                             commandName = commandName.substring(0,commandNameIndex);
                         }
                         if(commandName.startsWith("VOL"))
@@ -328,15 +328,15 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                         switch(commandName)
                         {
                             case "WAITTING":
-                                tvEstado.setText("Entrenamiento listo para comenzar");
+                                tvStatus.setText("Entrenamiento listo para comenzar");
                                 break;
                             case "PAUSED":
-                                tvEstado.setText("Entrenamiento pausado");
+                                tvStatus.setText("Entrenamiento pausado");
                                 trainingPaused = true;
                                 break;
                             case "ENDED":
 
-                                tvEstado.setText(resumen);
+                                tvStatus.setText(summary);
                                 btnRestart.setText("Reiniciar");
                                 mService.stopMusic();
 
@@ -345,7 +345,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                             case "STARTED":
                                 btnRestart.setEnabled(true);
                             case "RESUMED":
-                                tvEstado.setText("Entrenamiento en Curso");
+                                tvStatus.setText("Entrenamiento en Curso");
                                 break;
                             case "Sad Music":
                                 playMusic("Sad");
@@ -357,13 +357,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 playMusic("Motivational");
                                 break;
                             case "NEXT":
-                                if(!enableMusDin)
+                                if(!enableDynamicMusic)
                                     mService.nextSong();
                                 break;
                             case "PLAY/STOP":
-                                if (firstSong && !enableMusDin)
+                                if (firstSong && !enableDynamicMusic)
                                 {
-                                    mService.startMusic();
+                                    mService.startUserMusic();
                                     firstSong = false;
                                 }
                                 else
@@ -389,20 +389,20 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
         public ConnectedThread(BluetoothSocket socket)
         {
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
+            InputStream temporalInput = null;
+            OutputStream temporalOutput = null;
 
             try
             {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
+                temporalInput = socket.getInputStream();
+                temporalOutput = socket.getOutputStream();
             } catch (IOException e)
             {
                 Log.e("ConnectedThread", "Error getting input/output streams", e);
             }
 
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
+            mmInStream = temporalInput;
+            mmOutStream = temporalOutput;
         }
 
         public void run()

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 
 public class MusicService extends Service {
     private final IBinder binder = new LocalBinder();
-    MediaPlayer reproductor;
+    MediaPlayer mediaPlayer;
     private ArrayList<Integer> songList = new ArrayList<>();
     int currentSong = 0;
 
@@ -27,8 +28,8 @@ public class MusicService extends Service {
     public void onDestroy()
     {
         Toast.makeText(this,"Servicio detenido",Toast.LENGTH_SHORT).show();
-        if(reproductor != null)
-            reproductor.stop();
+        if(mediaPlayer != null)
+            mediaPlayer.stop();
     }
 
     public class LocalBinder extends Binder
@@ -44,46 +45,47 @@ public class MusicService extends Service {
         return binder;
     }
 
-    public void setMusic(String music)
+    public void setDynamicMusic(String music)
     {
-        if(reproductor != null)
+        //Se utiliza para liberar la instancia del reproductor antes de cambiar a la otra
+        if(mediaPlayer != null)
         {
-            reproductor.release();
+            mediaPlayer.release();
         }
 
         if(music.equals("Sad"))
         {
-            reproductor = MediaPlayer.create(this, R.raw.sad_music);
-            reproductor.setLooping(true);
-            reproductor.start();
+            mediaPlayer = MediaPlayer.create(this, R.raw.sad_music);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
         }
         if(music.equals("Neutral"))
         {
-            reproductor = MediaPlayer.create(this, R.raw.neutral_music);
-            reproductor.setLooping(true);
-            reproductor.start();
+            mediaPlayer = MediaPlayer.create(this, R.raw.neutral_music);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
         }
         if(music.equals("Motivational"))
         {
-            reproductor = MediaPlayer.create(this, R.raw.motivational_music);
-            reproductor.setLooping(true);
-            reproductor.start();
+            mediaPlayer = MediaPlayer.create(this, R.raw.motivational_music);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
         }
     }
 
-    public void playPauseMusic()
+    public void toggleMusic()
     {
-        if(reproductor == null)
+        if(mediaPlayer == null)
             return ;
-        if(reproductor.isPlaying())
-            reproductor.pause();
+        if(mediaPlayer.isPlaying())
+            mediaPlayer.pause();
         else
-            reproductor.start();
+            mediaPlayer.start();
     }
 
     public void stopMusic(){
-        if(reproductor != null)
-            reproductor.stop();
+        if(mediaPlayer != null)
+            mediaPlayer.stop();
     }
 
     public void listRaw()
@@ -96,17 +98,18 @@ public class MusicService extends Service {
                 songList.add(field.getInt(field));
             } catch (IllegalAccessException e)
             {
+                Log.e("Raw list", "Error al leer lista de canciones", e);
             }
         }
     }
 
-    public void startMusic()
+    public void startUserMusic()
     {
-        if(reproductor != null)
-            reproductor.release();
-        reproductor = MediaPlayer.create(this, songList.get(0));
-        reproductor.setLooping(true);
-        reproductor.start();
+        if(mediaPlayer != null)
+            mediaPlayer.release();
+        mediaPlayer = MediaPlayer.create(this, songList.get(0));
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
     }
 
     public void nextSong()
@@ -117,14 +120,14 @@ public class MusicService extends Service {
         else
             currentSong++;
 
-        if(reproductor != null)
-            reproductor.release();
+        if(mediaPlayer != null)
+            mediaPlayer.release();
         else
             return;
 
-        reproductor = MediaPlayer.create(this, songList.get(currentSong));
-        reproductor.setLooping(true);
-        reproductor.start();
+        mediaPlayer = MediaPlayer.create(this, songList.get(currentSong));
+        mediaPlayer.setLooping(true);
+        mediaPlayer.start();
     }
 
 }

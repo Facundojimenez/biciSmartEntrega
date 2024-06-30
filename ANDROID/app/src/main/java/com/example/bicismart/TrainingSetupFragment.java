@@ -9,7 +9,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,17 +26,17 @@ public class TrainingSetupFragment extends Fragment {
 
     public static final int MAXIMUM_TIME_METERS_VALUE = 100000;
     RadioButton btnTime, btnMeters;
-    private TextView tvTrainningParameter;
-    private EditText etTrainningParameter;
-    private Spinner spItensity;
+    private TextView tvTrainingParameter;
+    private EditText etTrainingParameter;
+    private Spinner spIntensity;
     Button btnStart;
 
-    private final String[] intensidades = new String[]
-            {
-                    "Baja",
-                    "Media",
-                    "Alta",
-            };
+    private final String[] intensities = new String[]
+    {
+        "Baja",
+        "Media",
+        "Alta",
+    };
 
     private static String address = null;
 
@@ -80,17 +79,16 @@ public class TrainingSetupFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         btnTime = view.findViewById(R.id.btn_tiempo);
         btnMeters = view.findViewById(R.id.btn_metros);
-        tvTrainningParameter = view.findViewById(R.id.tvEntrenamiento);
-        etTrainningParameter = view.findViewById(R.id.et_parametro_Entrenamiento);
+        tvTrainingParameter = view.findViewById(R.id.tvEntrenamiento);
+        etTrainingParameter = view.findViewById(R.id.et_parametro_Entrenamiento);
         btnStart = view.findViewById(R.id.btn_start);
-        spItensity = view.findViewById(R.id.spinner_Intensidad);
+        spIntensity = view.findViewById(R.id.spinner_Intensidad);
 
-        ArrayAdapter<String> adaptador = new ArrayAdapter<>(requireActivity().getApplicationContext(), android.R.layout.simple_spinner_item, intensidades);
-        spItensity.setAdapter(adaptador);
-        // esto es para cambiar el color del 1er item seleccionado
-        spItensity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireActivity().getApplicationContext(), android.R.layout.simple_spinner_item, intensities);
+        spIntensity.setAdapter(adapter);
+        spIntensity.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                TextView ch = ((TextView) spItensity.getChildAt(0));
+                TextView ch = ((TextView) spIntensity.getChildAt(0));
                 if (ch != null) {
                     ch.setTextColor(Color.parseColor("#2E7D32"));
                 }
@@ -108,7 +106,7 @@ public class TrainingSetupFragment extends Fragment {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                tvTrainningParameter.setText("Ingresar Tiempo (en Minutos)");
+                tvTrainingParameter.setText("Ingresar Tiempo (en Minutos)");
             }
         });
 
@@ -116,22 +114,22 @@ public class TrainingSetupFragment extends Fragment {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                tvTrainningParameter.setText("Ingresar Metros");
+                tvTrainingParameter.setText("Ingresar Metros");
             }
         });
 
         btnStart.setOnClickListener(v -> {
-            String str = etTrainningParameter.getText().toString();
+            String str = etTrainingParameter.getText().toString();
             if (str.isEmpty())
                 showToast("Ingresar Parametros");
             else {
                 int valor = Integer.parseInt(str);
                 if (valor >= 1 && valor < MAXIMUM_TIME_METERS_VALUE) {
-                    Intent i = new Intent(getActivity(), TrainningActivity.class);
-                    i.putExtra("Direccion_Bluethoot", address);
+                    Intent i = new Intent(getActivity(), TrainingActivity.class);
+                    i.putExtra("Direccion_Bluetooth", address);
                     i.putExtra("Duracion", valor);
                     i.putExtra("Por Tiempo", btnTime.isChecked());
-                    i.putExtra("Intensidad", spItensity.getSelectedItem().toString());
+                    i.putExtra("Intensidad", spIntensity.getSelectedItem().toString());
                     i.putExtra("Buzzer", enableBuzzer);
                     i.putExtra("Musica Dinamica", enableDinMusic);
                     startActivity(i);
@@ -144,7 +142,7 @@ public class TrainingSetupFragment extends Fragment {
                     try {
                         startActivity(browserIntent);
                     }catch (Exception e){
-                        showToast("Esto no era un eater egg...");
+                        showToast("Esto no era un easter egg...");
                     }
 
                 } else if (btnTime.isChecked()) {

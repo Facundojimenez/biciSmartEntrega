@@ -2,10 +2,8 @@ package com.example.bicismart;
 
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
@@ -28,6 +26,7 @@ public class PreTrainingActivity extends AppCompatActivity
     private TabLayout tabLayout;
     private ViewPager2 viewPager2;
     private String address = null;
+    private static final int ITEM_COUNT = 2;
 
     BluetoothManager bluetoothManager;
     private SingletonSocket mSocket;
@@ -55,12 +54,12 @@ public class PreTrainingActivity extends AppCompatActivity
         viewPager2 = findViewById(R.id.viewPager2);
 
         Bundle bundle =getIntent().getExtras();
-        address = bundle.getString("Direccion_Bluethoot");
+        address = bundle.getString("Direccion_Bluetooth");
 
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mSocket = SingletonSocket.getInstance(address, bluetoothManager);
 
-        viewPager2.setAdapter(new AdaptadorFragment(getSupportFragmentManager(), getLifecycle()));
+        viewPager2.setAdapter(new AdapterFragment(getSupportFragmentManager(), getLifecycle()));
         viewPager2.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback()
         {
             @Override
@@ -115,9 +114,9 @@ public class PreTrainingActivity extends AppCompatActivity
 
 
 
-    class AdaptadorFragment extends FragmentStateAdapter
+    class AdapterFragment extends FragmentStateAdapter
     {
-        public AdaptadorFragment(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle)
+        public AdapterFragment(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle)
         {
             super(fragmentManager, lifecycle);
         }
@@ -143,7 +142,7 @@ public class PreTrainingActivity extends AppCompatActivity
 
         @Override
         public int getItemCount() {
-            return 2;
+            return ITEM_COUNT;
         }
     }
 

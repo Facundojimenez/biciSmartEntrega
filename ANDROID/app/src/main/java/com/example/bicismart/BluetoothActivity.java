@@ -35,10 +35,10 @@ import androidx.core.content.ContextCompat;
 
 public class BluetoothActivity extends Activity
 {
-    private TextView txtEstado;
-    private Button btnActivar;
-    private Button btnEmparejar;
-    private Button btnBuscar;
+    private TextView tvStatus;
+    private Button btnActivate;
+    private Button btnPair;
+    private Button btnSearch;
 
     private ArrayList<BluetoothDevice> mDeviceList = new ArrayList<>();
 
@@ -62,16 +62,16 @@ public class BluetoothActivity extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bt_activity_bluetooth);
 
-        txtEstado = findViewById(R.id.txtEstado);
-        btnActivar = findViewById(R.id.btnActivar);
-        btnEmparejar = findViewById(R.id.btnEmparejar);
-        btnBuscar = findViewById(R.id.btnBuscar);
+        tvStatus = findViewById(R.id.txtEstado);
+        btnActivate = findViewById(R.id.btnActivar);
+        btnPair = findViewById(R.id.btnEmparejar);
+        btnSearch = findViewById(R.id.btnBuscar);
 
         bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         if (Build.VERSION.SDK_INT >= 31)
         {
             mBluetoothAdapter = bluetoothManager.getAdapter();
-            checkPermissions_PAST_SDK_31();
+            checkPermissions_AFTER_SDK_31();
         } else
         {
             mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -102,7 +102,8 @@ public class BluetoothActivity extends Activity
         unregisterReceiver(bluetoothBroadcastReceiver);
     }
 
-    private void checkPermissions_PAST_SDK_31()
+    //Chequea permisos actuales y agrega los faltantes
+    private void checkPermissions_AFTER_SDK_31()
     {
         int result;
         List<String> listPermissionsNeeded = new ArrayList<>();
@@ -121,6 +122,7 @@ public class BluetoothActivity extends Activity
         }
     }
 
+    //Chequea permisos actuales y agrega los faltantes
     private void checkBTPermissions_PRE_SDK_31()
     {
         int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
@@ -136,6 +138,7 @@ public class BluetoothActivity extends Activity
         if (mBluetoothAdapter == null)
         {
             showUnsupported();
+            return;
         }
         else
         {
@@ -149,6 +152,7 @@ public class BluetoothActivity extends Activity
             }
         }
 
+        //Suscripcion a eventos de Bluetooth
         IntentFilter filter = new IntentFilter();
         filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
         filter.addAction(BluetoothDevice.ACTION_FOUND);
@@ -205,47 +209,8 @@ public class BluetoothActivity extends Activity
             }
         }
     };
-//    private final BroadcastReceiver bluetoothBroadcastReceiver = new BroadcastReceiver()
-//    {
-//        @SuppressLint("MissingPermission")
-//        public void onReceive(Context context, Intent intent)
-//        {
-//            String action = intent.getAction();
-//            if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action))
-//            {
-//                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
-//                if (state == BluetoothAdapter.STATE_ON)
-//                {
-//                    showToast("Activar");
-//                    showEnabled();
-//                }
-//            }
-//            else if (BluetoothAdapter.ACTION_DISCOVERY_STARTED.equals(action))
-//            {
-//                mDeviceList = new ArrayList<>();
-//            }
-//            else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action))
-//            {
-//                Intent newIntent = new Intent(BluetoothActivity.this, DeviceListActivity.class);
-//                newIntent.putParcelableArrayListExtra("device.list", mDeviceList);
-//                startActivity(newIntent);
-//            }
-//            else if (BluetoothDevice.ACTION_FOUND.equals(action))
-//            {
-//                BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-//                if(!(mDeviceList.contains(device)))
-//                    mDeviceList.add(device);
-//
-//                if (device != null)
-//                {
-//                    showToast("Dispositivo Encontrado:" + device.getName());
-//                }
-//            }
-//        }
-//    };
 
-
-    public void btnEmparejarListener (View v)
+    public void btnGoToPairedDevicesScreenListener(View v)
     {
         @SuppressLint("MissingPermission")
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
@@ -265,7 +230,7 @@ public class BluetoothActivity extends Activity
     }
 
 @SuppressLint("MissingPermission")
-    public void btnBuscarListener (View v)
+    public void btnScanDevicesListener(View v)
     {
         if(!isLocationEnabled(this))
         {
@@ -277,7 +242,7 @@ public class BluetoothActivity extends Activity
     }
 
     @SuppressLint("MissingPermission")
-    public void btnActivarListener (View v)
+    public void btnToggleBluetoothListener(View v)
     {
         if (mBluetoothAdapter.isEnabled())
         {
@@ -286,8 +251,9 @@ public class BluetoothActivity extends Activity
         }
         else
         {
+            int bluetoothIntentCode = 1000;
             Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(intent, 1000);
+            startActivityForResult(intent, bluetoothIntentCode);
         }
     }
 
@@ -314,38 +280,38 @@ public class BluetoothActivity extends Activity
     @SuppressLint("SetTextI18n")
     private void showEnabled()
     {
-        txtEstado.setText("Bluetooth Habilitar");
-        txtEstado.setTextColor(Color.BLUE);
+        tvStatus.setText("Bluetooth Habilitar");
+        tvStatus.setTextColor(Color.BLUE);
 
-        btnActivar.setText("Desactivar");
-        btnActivar.setEnabled(true);
+        btnActivate.setText("Desactivar");
+        btnActivate.setEnabled(true);
 
-        btnEmparejar.setEnabled(true);
-        btnBuscar.setEnabled(true);
+        btnPair.setEnabled(true);
+        btnSearch.setEnabled(true);
     }
 
     @SuppressLint("SetTextI18n")
     private void showDisabled()
     {
-        txtEstado.setText("Bluetooth Deshabilitado");
-        txtEstado.setTextColor(Color.RED);
+        tvStatus.setText("Bluetooth Deshabilitado");
+        tvStatus.setTextColor(Color.RED);
 
-        btnActivar.setText("Activar");
-        btnActivar.setEnabled(true);
+        btnActivate.setText("Activar");
+        btnActivate.setEnabled(true);
 
-        btnEmparejar.setEnabled(false);
-        btnBuscar.setEnabled(false);
+        btnPair.setEnabled(false);
+        btnSearch.setEnabled(false);
     }
 
     @SuppressLint("SetTextI18n")
     private void showUnsupported()
     {
-        txtEstado.setText("Bluetooth no es soportado por el dispositivo movil");
+        tvStatus.setText("Bluetooth no es soportado por el dispositivo movil");
 
-        btnActivar.setText("Activar");
-        btnActivar.setEnabled(false);
+        btnActivate.setText("Activar");
+        btnActivate.setEnabled(false);
 
-        btnEmparejar.setEnabled(false);
-        btnBuscar.setEnabled(false);
+        btnPair.setEnabled(false);
+        btnSearch.setEnabled(false);
     }
 }

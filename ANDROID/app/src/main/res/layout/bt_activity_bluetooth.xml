@@ -19,20 +19,20 @@
         android:id="@+id/btnActivar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="btnActivarListener"
+        android:onClick="btnToggleBluetoothListener"
         android:text="Activar" />
 
     <Button
         android:id="@+id/btnEmparejar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="btnEmparejarListener"
+        android:onClick="btnGoToPairedDevicesScreenListener"
         android:text="Dispositivos Emparejados" />
 
     <Button
         android:id="@+id/btnBuscar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="btnBuscarListener"
+        android:onClick="btnScanDevicesListener"
         android:text="Buscar Dispositivos" />
 </LinearLayout>
