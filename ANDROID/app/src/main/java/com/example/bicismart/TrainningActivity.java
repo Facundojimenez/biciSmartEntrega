@@ -381,7 +381,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                                 audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume, 0 );
                                 showToast("Volumen: " + volume);
                             default:
-//                                showToast("Comando Erroneo");
                                 break;
                         }
                         recDataString.delete(0, recDataString.length());

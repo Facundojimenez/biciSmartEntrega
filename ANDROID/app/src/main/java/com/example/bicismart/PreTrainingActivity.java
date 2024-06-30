@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -148,9 +146,5 @@ public class PreTrainingActivity extends AppCompatActivity
         }
     }
 
-    private void showToast(String message)
-    {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
 }
 

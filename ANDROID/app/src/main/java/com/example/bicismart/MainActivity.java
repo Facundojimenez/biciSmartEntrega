@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    public void goToPreTrainingScreen(View view)
+    public void goToBluetoothScreen(View view)
     {
         Intent intent = new Intent(this, BluetoothActivity.class);
         startActivity(intent);

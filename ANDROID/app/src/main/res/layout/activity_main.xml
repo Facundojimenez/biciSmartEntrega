@@ -24,7 +24,7 @@
         android:layout_width="234dp"
         android:layout_height="76dp"
         android:layout_marginTop="140dp"
-        android:onClick="goToPreTrainingScreen"
+        android:onClick="goToBluetoothScreen"
         android:text="Empezar"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"

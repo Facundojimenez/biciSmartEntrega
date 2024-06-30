@@ -52,16 +52,6 @@ public class MediaSetupFragment extends Fragment
             }
         });
 
-//        swSensor.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                if(swSensor.isChecked())
-//                    showToast("Control por Sensores Activado");
-//            }
-//        });
-
         swBuzzer.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -81,7 +71,6 @@ public class MediaSetupFragment extends Fragment
                 Bundle bundle = new Bundle();
                 bundle.putBoolean("Musica_Dinamica", swMusic.isChecked());
                 bundle.putBoolean("Buzzer", swBuzzer.isChecked());
-              //  bundle.putBoolean("Control_Sensors", swSensor.isChecked());
                 getParentFragmentManager().setFragmentResult("datos", bundle);
             }
         });
