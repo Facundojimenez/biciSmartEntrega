@@ -13,17 +13,17 @@ bool summarySent;
 
 void defaultTraining() 
 {
-  setTraining.setTime = DEFAULTTIME;
-  setTraining.setMeters = DEFAULTMETERS;
-  setTraining.dynamicMusic = DEFAULTDYNAMICMUSIC;
-  setTraining.enableBuzzer = DEFAULTBUZZER;
+  setTraining.setTime = DEFAULT_TIME;
+  setTraining.setMeters = DEFAULT_METERS;
+  setTraining.dynamicMusic = DEFAULT_DYNAMIC_MUSIC;
+  setTraining.enableBuzzer = DEFAULT_BUZZER;
  
-  setTraining.personalizedTraining = DEFAULTTRAININGTYPE;
+  setTraining.personalizedTraining = DEFAULT_TRAINING_TYPE;
   trainingReceived = true;
   lctMetersCalculated = millis();
   lastTimeCalculatedTime = millis();
-  lowSpeed = LOW_SPEED_MEDIA;
-  highSpeed = HIGH_SPEED_MEDIA;
+  lowSpeed = MID_INTENSITY_LOW_SPEED;
+  highSpeed = MID_INTENSITY_HIGH_SPEED;
 }
 
 void resetTraining()

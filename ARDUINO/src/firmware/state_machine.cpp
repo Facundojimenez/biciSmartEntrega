@@ -1,7 +1,7 @@
-#include<Arduino.h>
-#include"definitions.h"
+#include <Arduino.h>
+#include "definitions.h"
 
-bool continueEventIsSend=false;
+bool continueEventIsSend = false;
 
 void state_machine()
 {
@@ -14,6 +14,7 @@ void state_machine()
     {
     case EVENT_TRAINING_RECEIVED:
       showTrainingState("Received");
+      continueEventIsSend = false;
       currentState = STATE_READY_FOR_TRAINING;
       break;
     case EVENT_CONTINUE:
@@ -38,10 +39,10 @@ void state_machine()
     case EVENT_CONTINUE:
       showTrainingState("Waiting to Start");
       if (!continueEventIsSend)
-       {        
+      {
         sendTrainningState("WAITTING");
-         continueEventIsSend=true;
-         }
+        continueEventIsSend = true;
+      }
 
       currentState = STATE_READY_FOR_TRAINING;
       break;

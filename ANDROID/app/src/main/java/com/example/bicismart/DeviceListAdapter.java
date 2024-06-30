@@ -20,23 +20,23 @@ import java.util.List;
 public class DeviceListAdapter extends BaseAdapter
 {
     private final LayoutInflater mInflater;
-    private List<BluetoothDevice> mData;
+    private List<BluetoothDevice> bluetoothDeviceList;
     private OnPairButtonClickListener mListener;
 
     public DeviceListAdapter(Context context) {
         mInflater = LayoutInflater.from(context);
     }
     public void setData(List<BluetoothDevice> data) {
-        mData = data;
+        bluetoothDeviceList = data;
     }
     public void setListener(OnPairButtonClickListener listener) {
         mListener = listener;
     }
     public int getCount() {
-        return (mData == null) ? 0 : mData.size();
+        return (bluetoothDeviceList == null) ? 0 : bluetoothDeviceList.size();
     }
     public Object getItem(int position) {
-        return mData.get(position);
+        return bluetoothDeviceList.get(position);
     }
     public long getItemId(int position) {
         return position;
@@ -61,21 +61,16 @@ public class DeviceListAdapter extends BaseAdapter
             holder = (ViewHolder) convertView.getTag();
         }
 
-        BluetoothDevice device	= mData.get(position);
+        BluetoothDevice device	= bluetoothDeviceList.get(position);
 
         holder.nameTv.setText(device.getName());
         holder.addressTv.setText(device.getAddress());
         holder.pairBtn.setText((device.getBondState() == BluetoothDevice.BOND_BONDED) ? "Connect" : "Pair");
 
-        holder.pairBtn.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
+        holder.pairBtn.setOnClickListener(v -> {
+            if (mListener != null)
             {
-                if (mListener != null)
-                {
-                    mListener.onPairButtonClick(position);
-                }
+                mListener.onPairButtonClick(position);
             }
         });
 

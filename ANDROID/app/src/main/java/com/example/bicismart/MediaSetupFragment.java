@@ -37,53 +37,26 @@ public class MediaSetupFragment extends Fragment
     {
         super.onViewCreated(view, savedInstanceState);
         swMusic = view.findViewById(R.id.switch_music);
-        //swSensor = view.findViewById(R.id.switch_sensor);
         swBuzzer = view.findViewById(R.id.switch_buzzer);
         btnSave = view.findViewById(R.id.btn_save);
 
 
-        swMusic.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if(swMusic.isChecked())
-                    showToast("Musica Dinamica Activada");
-            }
+        swMusic.setOnClickListener(v -> {
+            if(swMusic.isChecked())
+                showToast("Musica Dinamica Activada");
         });
 
-//        swSensor.setOnClickListener(new View.OnClickListener()
-//        {
-//            @Override
-//            public void onClick(View v)
-//            {
-//                if(swSensor.isChecked())
-//                    showToast("Control por Sensores Activado");
-//            }
-//        });
-
-        swBuzzer.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if(swBuzzer.isChecked())
-                    showToast("Buzzer Activado");
-            }
+        swBuzzer.setOnClickListener(v -> {
+            if(swBuzzer.isChecked())
+                showToast("Buzzer Activado");
         });
 
-        btnSave.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                showToast("Guardando Configuracion");
-                Bundle bundle = new Bundle();
-                bundle.putBoolean("Musica_Dinamica", swMusic.isChecked());
-                bundle.putBoolean("Buzzer", swBuzzer.isChecked());
-              //  bundle.putBoolean("Control_Sensors", swSensor.isChecked());
-                getParentFragmentManager().setFragmentResult("datos", bundle);
-            }
+        btnSave.setOnClickListener(v -> {
+            showToast("Guardando Configuracion");
+            Bundle bundle = new Bundle();
+            bundle.putBoolean("Musica_Dinamica", swMusic.isChecked());
+            bundle.putBoolean("Buzzer", swBuzzer.isChecked());
+            getParentFragmentManager().setFragmentResult("datos", bundle);
         });
     }
 

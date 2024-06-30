@@ -16,8 +16,8 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,6 +33,7 @@ import androidx.core.view.WindowInsetsCompat;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 
 public class TrainningActivity extends AppCompatActivity implements SensorEventListener
 {
@@ -45,7 +46,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     static boolean enableMusDin;
     //Musica
     static MusicService mService;
-    static boolean mBound = false;
+    static boolean mMediaPlayerServiceIsBound = false;
     static boolean firstSong;
     //Volumen
     AudioManager audioManager;
@@ -146,11 +147,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
         if(forTime)
         {
-            mConnectedThread.write(duracion*60 + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            int timeInSeconds = duracion * 60;
+            mConnectedThread.write(timeInSeconds + " 0 " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
         else
         {
-            mConnectedThread.write("0 " + duracion + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
+            int durationInMeters = duracion;
+            mConnectedThread.write("0 " + durationInMeters + " " + (enableMusDin? 1:0) + " " + (enableBuzzer?1:0) + " " + (intensidad.equals("Baja")?1:(intensidad.equals("Media")?2:3)));
         }
 
         getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
@@ -195,7 +198,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         super.onStop();
         unbindService(connection);
         firstSong = true;
-        mBound = false;
+        mMediaPlayerServiceIsBound = false;
     }
 
     @Override
@@ -218,12 +221,12 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         {
             MusicService.LocalBinder binder = (MusicService.LocalBinder) service;
             mService = binder.getService();
-            mBound = true;
+            mMediaPlayerServiceIsBound = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
-            mBound = false;
+            mMediaPlayerServiceIsBound = false;
         }
     };
 
@@ -233,36 +236,28 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
     {
         synchronized (this)
         {
-            switch (event.sensor.getType())
-            {
-                case Sensor.TYPE_PROXIMITY :
-                    if(firstReading)
-                    {
-                        lastProximitySensor = event.values[0];
-                        firstReading = false;
-                    }
+            if (event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
+                if (firstReading) {
+                    lastProximitySensor = event.values[0];
+                    firstReading = false;
+                }
 
-                    if(lastProximitySensor != event.values[0])
-                    {
-                        if (event.values[0] <= 0)
-                        {
-                            if (trainingPaused)
-                            {
-                                mConnectedThread.write("RESUME");
-                                tvEstado.setText("Entrenamiento en Curso");
-                                trainingPaused = false;
-                                playPauseMusic();
-                            } else
-                            {
-                                mConnectedThread.write("PAUSE");
-                                tvEstado.setText("Entrenamiento Pausado");
-                                trainingPaused = true;
-                                playPauseMusic();
-                            }
+                if (lastProximitySensor != event.values[0]) {
+                    if (event.values[0] <= 0) {
+                        if (trainingPaused) {
+                            mConnectedThread.write("RESUME");
+                            tvEstado.setText("Entrenamiento en Curso");
+                            trainingPaused = false;
+                            playPauseMusic();
+                        } else {
+                            mConnectedThread.write("PAUSE");
+                            tvEstado.setText("Entrenamiento Pausado");
+                            trainingPaused = true;
+                            playPauseMusic();
                         }
                     }
-                    lastProximitySensor = event.values[0];
-                    break;
+                }
+                lastProximitySensor = event.values[0];
             }
         }
     }
@@ -292,13 +287,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
 
     public void playMusic(String music)
     {
-        if(mBound)
+        if(mMediaPlayerServiceIsBound)
             mService.setMusic(music);
     }
 
     public void playPauseMusic()
     {
-        if(mBound)
+        if(mMediaPlayerServiceIsBound)
             mService.playPauseMusic();
     }
 
@@ -317,7 +312,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     if (endOfLineIndex > 0)
                     {
                         String commandName = recDataString.substring(0, endOfLineIndex).replaceAll("(\\r)", "");
-                        String[] commandArguments = null;
                         String resumen = "";
                         int volume = 0;
                         if(commandName.startsWith("ENDED"))
@@ -370,7 +364,6 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                             case "PLAY/STOP":
                                 if (firstSong && !enableMusDin)
                                 {
-                                    //mService.listRaw();
                                     mService.startMusic();
                                     firstSong = false;
                                 }
@@ -407,7 +400,7 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                 tmpOut = socket.getOutputStream();
             } catch (IOException e)
             {
-
+                Log.e("ConnectedThread", "Error getting input/output streams", e);
             }
 
             mmInStream = tmpIn;
@@ -426,8 +419,11 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
                     bytes = mmInStream.read(buffer);
                     String readMessage = new String(buffer, 0, bytes);
                     bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
-                } catch (IOException e)
-                {
+                }  catch (SocketTimeoutException e) {
+                    // Handle timeout, maybe retry
+                    Log.w("BluetoothThread", "Read timeout", e);
+                } catch (IOException e) {
+                    Log.e("BluetoothThread", "Error reading data", e);
                     break;
                 }
             }
@@ -437,12 +433,13 @@ public class TrainningActivity extends AppCompatActivity implements SensorEventL
         //write method
         public void write(String input)
         {
-            byte[] msgBuffer = input.getBytes();
             try
             {
+                byte[] msgBuffer = input.getBytes();
                 mmOutStream.write(msgBuffer);
             } catch (IOException e)
             {
+                Log.e("BluetoothCommunication", "Error writing data", e);
                 showToast("La conexion fallo");
                 finish();
             }
