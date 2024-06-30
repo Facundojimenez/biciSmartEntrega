@@ -130,7 +130,7 @@ public class TrainingSetupFragment extends Fragment {
                 showToast("Ingresar Parametros");
             else {
                 int valor = Integer.parseInt(str);
-                if (valor > 1 && valor < 100000) {
+                if (valor >= 1 && valor < 100000) {
                     Intent i = new Intent(getActivity(), TrainningActivity.class);
                     i.putExtra("Direccion_Bluethoot", address);
                     i.putExtra("Duracion", valor);

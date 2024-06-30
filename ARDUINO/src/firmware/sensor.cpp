@@ -21,6 +21,7 @@ void checkSpeedSensor()
   }
 
   int sensorValue = analogRead(HALL_SENSOR_PIN);
+  Serial.println(sensorValue);
 
   if (!acabaDePedalear && sensorValue < LOWER_SENSOR_HALL_THRESHOLD) 
   {
@@ -197,8 +198,8 @@ void checkVolumeSensor()
 
   int value = analogRead(VOLUME_SENSOR_PIN);
   int currentVolumeValue = map(value, MIN_POT_VALUE, MAX_POT_VALUE, MIN_VOLUME, MAX_VOLUME);
-  Serial.print("vol read:" );
-  Serial.println(currentVolumeValue);
+  //Serial.print("vol read:" );
+ // Serial.println(currentVolumeValue);
 
   if (currentVolumeValue != lastVolumeValue) 
   {
