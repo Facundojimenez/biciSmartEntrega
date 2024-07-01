@@ -81,18 +81,6 @@ public class SingletonSocket
         return this.btSocket;
     }
 
-//    public void close()
-//    {
-//        try
-//        {
-//            this.btSocket.close();
-//            this.instance = null;
-//        } catch (IOException e)
-//        {
-//
-//        }
-//    }
-
     public void close() {
         try {
             if (btSocket != null) {  // Check if btSocket is initialized
