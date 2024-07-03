@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:uno",
 	"programmer": "arduinoasispatmega32u4",
-	"sketch": "firmware.ino",
+	"sketch": "src\\firmware\\firmware.ino",
 	"output": ".\\build"
 }

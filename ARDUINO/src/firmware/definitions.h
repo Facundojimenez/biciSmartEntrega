@@ -2,7 +2,7 @@
 #define DEFINITIONS_H
 
 #include <Wire.h>
-#include "rgb_lcd.h"
+#include <rgb_lcd.h>
 #include <SoftwareSerial.h>
 // se usa en el array checkSensors
 #define NUMBER_OF_SENSORS 9
